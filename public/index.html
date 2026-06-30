@@ -1,0 +1,717 @@
+<!DOCTYPE html>
+<html lang="az">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#E1306C" />
+  <meta name="description" content="Instagram videolarını HD keyfiyyətdə endirin - logosuz və watermarksız" />
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+  <meta name="apple-mobile-web-app-title" content="InstaDown" />
+  <meta name="mobile-web-app-capable" content="yes" />
+  <link rel="manifest" href="/manifest.json" />
+  <link rel="apple-touch-icon" href="/icons/icon-192.png" />
+  <title>InstaDown – HD Video Endirici</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --ig-pink: #E1306C;
+      --ig-orange: #F77737;
+      --ig-purple: #833AB4;
+      --ig-grad: linear-gradient(135deg, #833AB4 0%, #E1306C 50%, #F77737 100%);
+      --bg: #0a0a0f;
+      --card: #12121a;
+      --card2: #1a1a24;
+      --text: #f0f0f0;
+      --muted: #888;
+      --radius: 18px;
+    }
+
+    html, body {
+      height: 100%;
+      background: var(--bg);
+      color: var(--text);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      overflow-x: hidden;
+    }
+
+    /* ─── Install Banner ──────────────────────────────────────── */
+    #install-banner {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      z-index: 9999;
+      background: var(--ig-grad);
+      padding: 14px 20px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      box-shadow: 0 -4px 30px rgba(225,48,108,0.4);
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+    #install-banner.show { transform: translateY(0); }
+    #install-banner .banner-icon {
+      width: 48px; height: 48px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.2);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 24px; flex-shrink: 0;
+    }
+    #install-banner .banner-text { flex: 1; }
+    #install-banner .banner-text strong { font-size: 15px; display: block; }
+    #install-banner .banner-text span { font-size: 12px; opacity: 0.85; }
+    #install-banner #install-btn {
+      background: white;
+      color: var(--ig-purple);
+      border: none;
+      padding: 10px 20px;
+      border-radius: 50px;
+      font-weight: 700;
+      font-size: 14px;
+      cursor: pointer;
+      white-space: nowrap;
+      flex-shrink: 0;
+    }
+    #install-banner #close-banner {
+      background: none; border: none;
+      color: white; font-size: 20px;
+      cursor: pointer; opacity: 0.8;
+      padding: 4px; flex-shrink: 0;
+    }
+
+    /* ─── Header ──────────────────────────────────────────────── */
+    header {
+      text-align: center;
+      padding: 50px 20px 30px;
+    }
+    .logo-wrap {
+      display: inline-flex;
+      align-items: center;
+      gap: 12px;
+      margin-bottom: 10px;
+    }
+    .logo-icon {
+      width: 56px; height: 56px;
+      background: var(--ig-grad);
+      border-radius: 16px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 28px;
+      box-shadow: 0 8px 24px rgba(225,48,108,0.4);
+    }
+    h1 {
+      font-size: 32px;
+      font-weight: 800;
+      background: var(--ig-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .tagline {
+      color: var(--muted);
+      font-size: 15px;
+      margin-top: 6px;
+    }
+
+    /* ─── Main Card ──────────────────────────────────────────── */
+    main { padding: 0 16px 120px; max-width: 600px; margin: 0 auto; }
+
+    .card {
+      background: var(--card);
+      border-radius: var(--radius);
+      padding: 24px;
+      border: 1px solid rgba(255,255,255,0.06);
+      margin-bottom: 16px;
+    }
+
+    /* ─── Input ──────────────────────────────────────────────── */
+    .input-wrap {
+      position: relative;
+      display: flex;
+      gap: 10px;
+    }
+    #url-input {
+      flex: 1;
+      background: var(--card2);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 16px 18px;
+      font-size: 15px;
+      color: var(--text);
+      outline: none;
+      transition: border-color 0.2s;
+      min-width: 0;
+    }
+    #url-input::placeholder { color: var(--muted); }
+    #url-input:focus { border-color: var(--ig-pink); }
+
+    #paste-btn {
+      background: var(--card2);
+      border: 2px solid rgba(255,255,255,0.08);
+      border-radius: 14px;
+      padding: 16px;
+      color: var(--muted);
+      cursor: pointer;
+      font-size: 18px;
+      transition: all 0.2s;
+      flex-shrink: 0;
+    }
+    #paste-btn:hover { border-color: var(--ig-pink); color: var(--ig-pink); }
+
+    #fetch-btn {
+      width: 100%;
+      margin-top: 12px;
+      background: var(--ig-grad);
+      border: none;
+      border-radius: 14px;
+      padding: 17px;
+      font-size: 16px;
+      font-weight: 700;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity 0.2s, transform 0.1s;
+      box-shadow: 0 4px 20px rgba(225,48,108,0.35);
+    }
+    #fetch-btn:hover { opacity: 0.92; }
+    #fetch-btn:active { transform: scale(0.98); }
+    #fetch-btn:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    /* ─── Status ─────────────────────────────────────────────── */
+    #status-wrap {
+      display: none;
+      align-items: center;
+      gap: 12px;
+      padding: 16px 20px;
+      background: var(--card2);
+      border-radius: 14px;
+      margin-top: 12px;
+      border: 1px solid rgba(255,255,255,0.06);
+    }
+    .spinner {
+      width: 22px; height: 22px;
+      border: 3px solid rgba(225,48,108,0.2);
+      border-top-color: var(--ig-pink);
+      border-radius: 50%;
+      animation: spin 0.8s linear infinite;
+      flex-shrink: 0;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    #status-text { font-size: 14px; color: var(--muted); }
+
+    /* ─── Error ──────────────────────────────────────────────── */
+    #error-wrap {
+      display: none;
+      padding: 16px 20px;
+      background: rgba(225,48,108,0.1);
+      border: 1px solid rgba(225,48,108,0.3);
+      border-radius: 14px;
+      margin-top: 12px;
+      color: #ff6b9d;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+    #error-wrap i { margin-right: 8px; }
+
+    /* ─── Result ─────────────────────────────────────────────── */
+    #result-wrap {
+      display: none;
+      margin-top: 16px;
+      animation: fadeIn 0.4s ease;
+    }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+    .video-container {
+      position: relative;
+      width: 100%;
+      border-radius: var(--radius);
+      overflow: hidden;
+      background: #000;
+      aspect-ratio: 9/16;
+      max-height: 65vh;
+    }
+    .video-container video {
+      width: 100%; height: 100%;
+      object-fit: contain;
+    }
+
+    .video-info {
+      padding: 16px 0 12px;
+    }
+    .video-info .caption {
+      font-size: 14px;
+      color: var(--muted);
+      line-height: 1.5;
+      display: -webkit-box;
+      -webkit-line-clamp: 3;
+      -webkit-box-orient: vertical;
+      overflow: hidden;
+    }
+
+    #download-btn {
+      width: 100%;
+      background: var(--ig-grad);
+      border: none;
+      border-radius: 14px;
+      padding: 18px;
+      font-size: 17px;
+      font-weight: 800;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      transition: opacity 0.2s, transform 0.1s;
+      box-shadow: 0 6px 24px rgba(225,48,108,0.4);
+      margin-top: 4px;
+      letter-spacing: 0.3px;
+    }
+    #download-btn:hover { opacity: 0.92; }
+    #download-btn:active { transform: scale(0.98); }
+    #download-btn:disabled {
+      opacity: 0.5;
+      cursor: not-allowed;
+    }
+    #download-btn .dl-progress {
+      display: none;
+      font-size: 13px;
+      opacity: 0.9;
+    }
+
+    /* ─── Progress Bar ───────────────────────────────────────── */
+    #dl-progress-wrap {
+      display: none;
+      margin-top: 10px;
+    }
+    .progress-bar-bg {
+      background: var(--card2);
+      border-radius: 50px;
+      height: 8px;
+      overflow: hidden;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background: var(--ig-grad);
+      border-radius: 50px;
+      width: 0%;
+      transition: width 0.3s ease;
+    }
+    .progress-label {
+      font-size: 12px;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 6px;
+    }
+
+    /* ─── Tips ───────────────────────────────────────────────── */
+    .tips {
+      margin-top: 24px;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+    }
+    .tip-card {
+      background: var(--card);
+      border-radius: 14px;
+      padding: 18px 14px;
+      text-align: center;
+      border: 1px solid rgba(255,255,255,0.05);
+    }
+    .tip-card i {
+      font-size: 24px;
+      background: var(--ig-grad);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .tip-card p { font-size: 12px; color: var(--muted); line-height: 1.4; }
+
+    /* ─── Responsive ─────────────────────────────────────────── */
+    @media (max-width: 400px) {
+      h1 { font-size: 26px; }
+      .tips { grid-template-columns: 1fr; }
+      .video-container { max-height: 55vh; }
+    }
+
+    /* ─── Success Checkmark ──────────────────────────────────── */
+    .dl-done-msg {
+      display: none;
+      text-align: center;
+      padding: 12px;
+      background: rgba(131,58,180,0.1);
+      border: 1px solid rgba(131,58,180,0.3);
+      border-radius: 12px;
+      margin-top: 10px;
+      font-size: 14px;
+      color: #c084fc;
+    }
+    .dl-done-msg i { margin-right: 8px; }
+  </style>
+</head>
+<body>
+
+<!-- Install Banner -->
+<div id="install-banner">
+  <div class="banner-icon">⬇️</div>
+  <div class="banner-text">
+    <strong>InstaDown-u Quraşdır</strong>
+    <span>Ana ekrana əlavə et – sürətli giriş</span>
+  </div>
+  <button id="install-btn"><i class="fas fa-download"></i> Quraşdır</button>
+  <button id="close-banner"><i class="fas fa-times"></i></button>
+</div>
+
+<!-- Header -->
+<header>
+  <div class="logo-wrap">
+    <div class="logo-icon">📥</div>
+    <h1>InstaDown</h1>
+  </div>
+  <p class="tagline">Instagram videolarını HD keyfiyyətdə endirin</p>
+</header>
+
+<!-- Main -->
+<main>
+  <div class="card">
+    <!-- URL Input -->
+    <div class="input-wrap">
+      <input
+        id="url-input"
+        type="url"
+        placeholder="Instagram linkini bura yapışdırın..."
+        autocomplete="off"
+        autocorrect="off"
+        autocapitalize="off"
+        spellcheck="false"
+      />
+      <button id="paste-btn" title="Yapışdır">
+        <i class="fas fa-clipboard"></i>
+      </button>
+    </div>
+
+    <button id="fetch-btn">
+      <i class="fab fa-instagram"></i>
+      Videonu Tap
+    </button>
+
+    <!-- Status -->
+    <div id="status-wrap">
+      <div class="spinner"></div>
+      <span id="status-text">Video axtarılır...</span>
+    </div>
+
+    <!-- Error -->
+    <div id="error-wrap">
+      <i class="fas fa-exclamation-circle"></i>
+      <span id="error-text"></span>
+    </div>
+  </div>
+
+  <!-- Result -->
+  <div id="result-wrap">
+    <div class="card">
+      <div class="video-container">
+        <video id="preview-video" controls playsinline preload="metadata"></video>
+      </div>
+      <div class="video-info">
+        <p class="caption" id="video-caption"></p>
+      </div>
+      <button id="download-btn">
+        <i class="fas fa-download"></i>
+        HD Videonu Endir
+        <span class="dl-progress" id="dl-progress-text"></span>
+      </button>
+      <div id="dl-progress-wrap">
+        <div class="progress-bar-bg">
+          <div class="progress-bar-fill" id="dl-bar"></div>
+        </div>
+        <p class="progress-label" id="dl-label">Endiriliir...</p>
+      </div>
+      <div class="dl-done-msg" id="dl-done-msg">
+        <i class="fas fa-check-circle"></i>
+        Video uğurla endirildi! Qalereyanızı yoxlayın.
+      </div>
+    </div>
+  </div>
+
+  <!-- Tips -->
+  <div class="tips">
+    <div class="tip-card">
+      <i class="fas fa-hd"></i>
+      <p>Orijinal HD keyfiyyət</p>
+    </div>
+    <div class="tip-card">
+      <i class="fas fa-ban"></i>
+      <p>Logo və watermark yoxdur</p>
+    </div>
+    <div class="tip-card">
+      <i class="fas fa-shield-alt"></i>
+      <p>Məlumat saxlanmır</p>
+    </div>
+    <div class="tip-card">
+      <i class="fas fa-bolt"></i>
+      <p>Sürətli endirmə</p>
+    </div>
+  </div>
+</main>
+
+<script src="/socket.io/socket.io.js"></script>
+<script>
+// ─── State ────────────────────────────────────────────────────────────────────
+let currentVideoUrl = '';
+let deferredPrompt = null;
+let installDismissed = false;
+
+// ─── Elements ─────────────────────────────────────────────────────────────────
+const urlInput      = document.getElementById('url-input');
+const pasteBtn      = document.getElementById('paste-btn');
+const fetchBtn      = document.getElementById('fetch-btn');
+const statusWrap    = document.getElementById('status-wrap');
+const statusText    = document.getElementById('status-text');
+const errorWrap     = document.getElementById('error-wrap');
+const errorText     = document.getElementById('error-text');
+const resultWrap    = document.getElementById('result-wrap');
+const previewVideo  = document.getElementById('preview-video');
+const videoCap      = document.getElementById('video-caption');
+const downloadBtn   = document.getElementById('download-btn');
+const dlProgressWrap= document.getElementById('dl-progress-wrap');
+const dlBar         = document.getElementById('dl-bar');
+const dlLabel       = document.getElementById('dl-label');
+const dlDoneMsg     = document.getElementById('dl-done-msg');
+const installBanner = document.getElementById('install-banner');
+const installBtn    = document.getElementById('install-btn');
+const closeBanner   = document.getElementById('close-banner');
+
+// ─── PWA Install ──────────────────────────────────────────────────────────────
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const dismissed = localStorage.getItem('pwa_dismissed');
+  if (!dismissed) {
+    setTimeout(() => installBanner.classList.add('show'), 1500);
+  }
+});
+
+installBtn.addEventListener('click', async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt();
+    const { outcome } = await deferredPrompt.userChoice;
+    if (outcome === 'accepted') {
+      installBanner.classList.remove('show');
+      localStorage.setItem('pwa_installed', '1');
+    }
+    deferredPrompt = null;
+  }
+});
+
+closeBanner.addEventListener('click', () => {
+  installBanner.classList.remove('show');
+  localStorage.setItem('pwa_dismissed', '1');
+});
+
+window.addEventListener('appinstalled', () => {
+  installBanner.classList.remove('show');
+  deferredPrompt = null;
+  console.log('PWA installed');
+});
+
+// ─── Paste ────────────────────────────────────────────────────────────────────
+pasteBtn.addEventListener('click', async () => {
+  try {
+    const text = await navigator.clipboard.readText();
+    if (text) {
+      urlInput.value = text.trim();
+      urlInput.focus();
+    }
+  } catch {
+    urlInput.focus();
+    document.execCommand('paste');
+  }
+});
+
+// ─── UI Helpers ───────────────────────────────────────────────────────────────
+function showStatus(msg) {
+  statusText.textContent = msg;
+  statusWrap.style.display = 'flex';
+  errorWrap.style.display = 'none';
+}
+function hideStatus() { statusWrap.style.display = 'none'; }
+function showError(msg) {
+  errorText.textContent = msg;
+  errorWrap.style.display = 'block';
+  statusWrap.style.display = 'none';
+}
+function hideAll() {
+  statusWrap.style.display = 'none';
+  errorWrap.style.display = 'none';
+  resultWrap.style.display = 'none';
+  dlProgressWrap.style.display = 'none';
+  dlDoneMsg.style.display = 'none';
+  dlBar.style.width = '0%';
+}
+
+// ─── Socket.IO ────────────────────────────────────────────────────────────────
+const socket = io();
+
+socket.on('status', (data) => showStatus(data.message));
+socket.on('result', (data) => {
+  hideStatus();
+  if (data.success && data.videoUrl) {
+    showResult(data);
+  } else {
+    showError('Video tapılmadı');
+  }
+  fetchBtn.disabled = false;
+  fetchBtn.innerHTML = '<i class="fab fa-instagram"></i> Videonu Tap';
+});
+socket.on('error', (data) => {
+  showError(data.message);
+  fetchBtn.disabled = false;
+  fetchBtn.innerHTML = '<i class="fab fa-instagram"></i> Videonu Tap';
+});
+
+// ─── Fetch Video ──────────────────────────────────────────────────────────────
+fetchBtn.addEventListener('click', fetchVideo);
+urlInput.addEventListener('keydown', (e) => { if (e.key === 'Enter') fetchVideo(); });
+
+function fetchVideo() {
+  const url = urlInput.value.trim();
+  if (!url) { showError('Zəhmət olmasa Instagram linki daxil edin.'); return; }
+  if (!url.match(/instagram\.com\/(p|reel|tv)\//)) {
+    showError('Keçərsiz link. Instagram post, reel və ya tv linki daxil edin.');
+    return;
+  }
+
+  hideAll();
+  fetchBtn.disabled = true;
+  fetchBtn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> Axtarılır...';
+  showStatus('Video məlumatları götürülür...');
+
+  // Use Socket.IO for real-time updates
+  socket.emit('extract', { url });
+}
+
+function showResult(data) {
+  currentVideoUrl = data.videoUrl;
+  
+  // Set video source via proxy to avoid CORS
+  const proxyUrl = `/api/proxy?url=${encodeURIComponent(data.videoUrl)}`;
+  previewVideo.src = proxyUrl;
+  previewVideo.load();
+
+  if (data.caption) {
+    videoCap.textContent = data.caption;
+    videoCap.style.display = 'block';
+  } else {
+    videoCap.style.display = 'none';
+  }
+
+  // Reset download state
+  downloadBtn.disabled = false;
+  downloadBtn.innerHTML = '<i class="fas fa-download"></i> HD Videonu Endir';
+  dlDoneMsg.style.display = 'none';
+  dlProgressWrap.style.display = 'none';
+
+  resultWrap.style.display = 'block';
+  setTimeout(() => resultWrap.scrollIntoView({ behavior: 'smooth', block: 'start' }), 100);
+}
+
+// ─── Download ─────────────────────────────────────────────────────────────────
+downloadBtn.addEventListener('click', downloadVideo);
+
+async function downloadVideo() {
+  if (!currentVideoUrl || downloadBtn.disabled) return;
+
+  downloadBtn.disabled = true;
+  downloadBtn.innerHTML = '<div class="spinner" style="width:20px;height:20px;border-width:2px;"></div> Hazırlanır...';
+  dlProgressWrap.style.display = 'block';
+  dlDoneMsg.style.display = 'none';
+  dlBar.style.width = '5%';
+  dlLabel.textContent = 'Endirmə başlanır...';
+
+  try {
+    const proxyUrl = `/api/proxy?url=${encodeURIComponent(currentVideoUrl)}`;
+    
+    // Fetch with progress tracking
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error('Server xətası: ' + response.status);
+
+    const contentLength = response.headers.get('content-length');
+    const total = contentLength ? parseInt(contentLength) : 0;
+    let loaded = 0;
+    const chunks = [];
+
+    const reader = response.body.getReader();
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      chunks.push(value);
+      loaded += value.length;
+
+      if (total > 0) {
+        const pct = Math.min(95, Math.round((loaded / total) * 100));
+        dlBar.style.width = pct + '%';
+        dlLabel.textContent = `${formatBytes(loaded)} / ${formatBytes(total)} (${pct}%)`;
+      } else {
+        dlBar.style.width = '60%';
+        dlLabel.textContent = `${formatBytes(loaded)} endirilib...`;
+      }
+
+      downloadBtn.innerHTML = `<i class="fas fa-download"></i> Endiriliir... ${total > 0 ? Math.round((loaded/total)*100) + '%' : ''}`;
+    }
+
+    dlBar.style.width = '100%';
+    dlLabel.textContent = 'Saxlanılır...';
+
+    const blob = new Blob(chunks, { type: 'video/mp4' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `instagram_video_${Date.now()}.mp4`;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => {
+      document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    }, 1000);
+
+    // Success
+    dlBar.style.width = '100%';
+    dlLabel.textContent = 'Uğurla endirildi!';
+    dlDoneMsg.style.display = 'block';
+    downloadBtn.innerHTML = '<i class="fas fa-check"></i> Endirildi!';
+    downloadBtn.style.background = 'linear-gradient(135deg, #22c55e, #16a34a)';
+    downloadBtn.disabled = true;
+
+  } catch (err) {
+    console.error('Download error:', err);
+    dlProgressWrap.style.display = 'none';
+    showError('Endirmə xətası: ' + err.message + '. Yenidən cəhd edin.');
+    downloadBtn.disabled = false;
+    downloadBtn.style.background = '';
+    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Yenidən Cəhd Et';
+  }
+}
+
+function formatBytes(bytes) {
+  if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+// ─── Service Worker ───────────────────────────────────────────────────────────
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(() => {
+    console.log('SW registered');
+  }).catch(() => {});
+}
+</script>
+</body>
+</html>
